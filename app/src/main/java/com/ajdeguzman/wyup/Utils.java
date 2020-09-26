@@ -1,10 +1,3 @@
-/**
- * Author: UCU Knight Coders on 9/07/2016.
- * Website: http://facebook.com/teamucuccs
- * E-mail: teamucuccs@gmail.com
- */
-
-
 package com.ajdeguzman.wyup;
 
 import android.content.Context;
