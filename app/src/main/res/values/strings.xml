@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">What\'s your ulam pare?</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="msg_no_connection">No connection detected.\n Please try again.</string>
+    <string name="msg_no_connection_short">"Can't connect right now"</string>
+
+    <string name="action_retry">Retry</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_submit">Submit</string>
+
+    <string name="err_msg_unrecognized_image">Sorry, there was an error recognizing your image.</string>
+    <string name="err_msg_unable_to_load_image">Unable to load selected image.</string>
+    <string name="err_msg_cannot_connect">"Can't connect right now"</string>
+    <string name="info_msg_loading">Loading…</string>
+    <string name="confirm_msg_correct">"Is this correct?"</string>
+    <string name="info_allow_permission_capture">"You need to allow permission in order to capture images."</string>
+    <string name="click_one_of_the_tags_below">See below predictions</string>
+    <string name="err_unable_load_image">Unable to load selected image.</string>
+    <string name="empty_str_recent">Start by taking photo of ingredients</string>
+</resources>
