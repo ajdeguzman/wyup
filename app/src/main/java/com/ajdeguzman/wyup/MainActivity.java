@@ -21,6 +21,7 @@ import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -34,6 +35,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import com.ajdeguzman.wyup.custom.AdjustableLayout;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
@@ -57,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int CODE_SHOT = 2;
     private static final int REQUEST_SHOT = 3;
     private static final int CODE_SPEAK = 4;
+    private ChipGroup chipGroup;
 
     private static final int REQUEST_STORAGE = 0;
     private static final int REQUEST_IMAGE_CAPTURE = REQUEST_STORAGE + 1;
@@ -215,7 +219,42 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+    private void addNewChip(String keyword) {
 
+        try {
+            LayoutInflater inflater = LayoutInflater.from(this);
+            Chip newChip = (Chip) inflater.inflate(R.layout.layout_chip_entry, this.chipGroup, false);
+            newChip.setText(keyword);
+            this.chipGroup.addView(newChip);
+            newChip.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    handleChipCheckChanged((Chip) buttonView, isChecked);
+                }
+            });
+
+            newChip.setOnCloseIconClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    handleChipCloseIconClicked((Chip) v);
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    // User close a Chip.
+    private void handleChipCloseIconClicked(Chip chip) {
+        ChipGroup parent = (ChipGroup) chip.getParent();
+        parent.removeView(chip);
+    }
+
+    // Chip Checked Changed
+    private void handleChipCheckChanged(Chip chip, boolean isChecked) {
+    }
     void requestPermission() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_SHOT);
     }
@@ -306,22 +345,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return null;
     }
-
-   /* private RecognitionResult recognizeBitmap(Bitmap bitmap) {
-        try {
-
-            Bitmap scaled = Bitmap.createScaledBitmap(bitmap, 320,
-                    320 * bitmap.getHeight() / bitmap.getWidth(), true);
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            scaled.compress(Bitmap.CompressFormat.JPEG, 90, out);
-            jpeg = out.toByteArray();
-
-            return client.recognize(new RecognitionRequest(jpeg)).get(0);
-        } catch (ClarifaiException e) {
-            return null;
-        }
-    }
-*/
     private void updateUIForResult(List<String> result) {
         tagsListInitial.clear();
 
@@ -338,38 +361,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    void submitTag(String tag) {
-        /*Intent i = new Intent(getApplicationContext(), ResultActivity.class);
-        i.putExtra("str_tag", tag);
-        i.putExtra("type", 1);
-        i.putExtra("byteArray", jpeg);
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(i);
-        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);*/
-    }
-
     private void addChipsViewFinal(List<String> tagList) {
         AdjustableLayout adjustableLayout = (AdjustableLayout) findViewById(R.id.container);
         adjustableLayout.removeAllViews();
         for (int i = 0; i < tagList.size(); i++) {
             @SuppressLint("InflateParams") final View newView = LayoutInflater.from(this).inflate(R.layout.layout_view_chip_text, null);
-            LinearLayout linearChipTag = (LinearLayout) newView.findViewById(R.id.linear_chip_tag);
-            final TextView txtChipTag = (TextView) newView.findViewById(R.id.txt_chip_content);
-
-            linearChipTag.setOnClickListener(new View.OnClickListener() {
-                @SuppressLint("WrongConstant")
-                @Override
-                public void onClick(View view) {
-
-                    final String tempTags = txtChipTag.getText().toString();
-                    if (mNetConn.isConnectedToInternet()) {
-                        submitTag(tempTags);
-                    } else {
-
-                    }
-                }
-            });
-            txtChipTag.setText(tagList.get(i));
+            chipGroup = (ChipGroup) newView.findViewById(R.id.chipGroup);
+            addNewChip(tagList.get(i));
             adjustableLayout.addingMultipleView(newView);
         }
         adjustableLayout.invalidateView();
