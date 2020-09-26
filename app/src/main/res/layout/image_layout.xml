@@ -40,10 +40,35 @@
             android:textColor="#000"
             android:textSize="16sp" />
 
+        <LinearLayout
+            android:id="@+id/linearAddIngredients"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="invisible">
+
+            <EditText
+                android:id="@+id/txtIngredients"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:layout_weight="1"
+                android:ems="10"
+                android:hint="Enter ingredients"
+                android:inputType="textPersonName" />
+
+            <Button
+                android:id="@+id/btnAddIngredients"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="ADD" />
+        </LinearLayout>
+
         <androidx.core.widget.NestedScrollView
             android:id="@+id/nestedScrollGroup"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="fill_vertical"
             android:background="@android:color/white"
             android:scrollbars="none"
@@ -63,5 +88,22 @@
 
         </androidx.core.widget.NestedScrollView>
 
+        <LinearLayout
+            android:id="@+id/linearGenerate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:visibility="invisible"
+            tools:visibility="invisible">
+
+            <Button
+                android:id="@+id/btnGenerateRecipe"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="GENERATE RECIPE" />
+        </LinearLayout>
+
     </LinearLayout>
+
 </LinearLayout>

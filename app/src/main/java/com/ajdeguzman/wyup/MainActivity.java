@@ -3,6 +3,7 @@ package com.ajdeguzman.wyup;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,7 +13,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,8 +20,12 @@ import android.provider.MediaStore;
 import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -29,6 +33,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -61,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_SHOT = 3;
     private static final int CODE_SPEAK = 4;
     private ChipGroup chipGroup;
+    private Button btnAddIngredients;
+    private Button btnGenerateRecipe;
+    private EditText txtIngredients;
 
     private static final int REQUEST_STORAGE = 0;
     private static final int REQUEST_IMAGE_CAPTURE = REQUEST_STORAGE + 1;
@@ -77,8 +85,11 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imgResult;
     private ImageView imgEmptyState;
     private LinearLayout mLinearEmpty;
+    private LinearLayout linearGenerate;
+    private LinearLayout linearAddIngredients;
     NetworkConnectivity mNetConn = new NetworkConnectivity(MainActivity.this);
 
+    private MenuItem item;
     private Uri imageUri;
     private Bitmap thumbnail;
 
@@ -101,16 +112,40 @@ public class MainActivity extends AppCompatActivity {
         mLblEmptyState = (TextView) findViewById(R.id.lbl_empty_state);
         imgEmptyState = (ImageView) findViewById(R.id.img_empty_state);
         mLblSelectTag = (TextView) findViewById(R.id.lbl_select_tag);
+        btnAddIngredients = (Button) findViewById(R.id.btnAddIngredients);
+        btnGenerateRecipe = (Button) findViewById(R.id.btnGenerateRecipe);
+        txtIngredients = (EditText) findViewById(R.id.txtIngredients);
+        linearAddIngredients = (LinearLayout) findViewById(R.id.linearAddIngredients);
+        linearGenerate = (LinearLayout) findViewById(R.id.linearGenerate);
 
         mLinearEmpty = (LinearLayout) findViewById(R.id.layout_empty_state);
         confirmTextDialog = new AlertDialog.Builder(this);
         setSupportActionBar(toolbar);
         grantPermissions();
         FloatingActionButton fab = findViewById(R.id.fabCamera);
+        btnAddIngredients.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String keyword = txtIngredients.getText().toString();
+                if (keyword == null || keyword.isEmpty()) {
+                    Toast.makeText(getApplicationContext(), "Please enter ingredients!", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                addNewChip(keyword);
+            }
+        });
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 cameraShot();
+            }
+        });
+        btnGenerateRecipe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(getApplicationContext(), RecipeActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
             }
         });
     }
@@ -219,6 +254,32 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    public void search() {
+        item.expandActionView();
+    }
+
+    private void handleIntent(Intent intent) {
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+          /*  String query = intent.getStringExtra(SearchManager.QUERY);
+
+            Intent i = new Intent(getApplicationContext(), ResultActivity.class);
+            i.putExtra("str_tag", query);
+            i.putExtra("type", 1);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);*/
+        }
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.options_menu, menu);
+        this.item = menu.findItem(R.id.search);
+
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        return true;
+    }
     private void addNewChip(String keyword) {
 
         try {
@@ -239,7 +300,9 @@ public class MainActivity extends AppCompatActivity {
                     handleChipCloseIconClicked((Chip) v);
                 }
             });
-
+            linearAddIngredients.setVisibility(View.VISIBLE);
+            linearGenerate.setVisibility(View.VISIBLE);
+            this.txtIngredients.setText("");
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
