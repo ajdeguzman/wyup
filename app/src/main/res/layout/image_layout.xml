@@ -20,18 +20,6 @@
             tools:ignore="ContentDescription" />
 
         <TextView
-            android:id="@+id/lbl_select_tag"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:fontFamily="sans-serif"
-            android:padding="10dp"
-            android:text="@string/click_one_of_the_tags_below"
-            android:textSize="18sp"
-            android:visibility="gone"
-            tools:targetApi="jelly_bean" />
-
-        <TextView
             android:id="@+id/lbl_result_tag"
             android:layout_width="match_parent"
             android:layout_height="100dp"
@@ -65,12 +53,22 @@
                 android:text="ADD" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/lbl_select_tag"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:padding="10dp"
+            android:text="@string/click_one_of_the_tags_below"
+            android:textSize="18sp"
+            android:visibility="gone"
+            tools:targetApi="jelly_bean" />
+
         <androidx.core.widget.NestedScrollView
             android:id="@+id/nestedScrollGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="fill_vertical"
-            android:background="@android:color/white"
             android:scrollbars="none"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
@@ -80,29 +78,32 @@
                 android:overScrollMode="never"
                 android:padding="10dp">
 
-                <com.ajdeguzman.wyup.custom.AdjustableLayout
-                    android:id="@+id/container"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="wrap_content"
+                    tools:context=".MainActivity">
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        tools:ignore="MissingConstraints"
+                        tools:layout_editor_absoluteX="395dp" />
+
+                    <Button
+                        android:id="@+id/btnGenerateRecipe"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:text="GENERATE RECIPE"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/chipGroup" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
             </com.ajdeguzman.wyup.custom.GroupScrollView>
 
         </androidx.core.widget.NestedScrollView>
-
-        <LinearLayout
-            android:id="@+id/linearGenerate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:visibility="invisible"
-            tools:visibility="invisible">
-
-            <Button
-                android:id="@+id/btnGenerateRecipe"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="GENERATE RECIPE" />
-        </LinearLayout>
 
     </LinearLayout>
 

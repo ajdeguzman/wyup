@@ -17,7 +17,7 @@
     <string name="info_allow_permission_capture">"You need to allow permission in order to capture images."</string>
     <string name="click_one_of_the_tags_below">See below predictions</string>
     <string name="err_unable_load_image">Unable to load selected image.</string>
-    <string name="empty_str_recent">Start by taking photo of ingredients</string>
+    <string name="empty_str_recent">Start by taking photo of your ingredients</string>
     <string name="search">Search Recipe</string>
     <string name="title_activity_recipe">RecipeActivity</string>
     <!-- Strings used for fragments for navigation -->
@@ -27,5 +27,8 @@
     <string name="previous">Previous</string>
 
     <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="preference_file_key">my_preference_key</string>
+    <string name="pref_keyword">pref_keyword</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+
 </resources>

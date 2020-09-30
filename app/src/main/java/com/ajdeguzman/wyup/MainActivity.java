@@ -39,7 +39,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
-import com.ajdeguzman.wyup.custom.AdjustableLayout;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -59,15 +58,12 @@ public class MainActivity extends AppCompatActivity {
 
     final ClarifaiClient client = new ClarifaiBuilder(Credentials.CLARIFAI.API_KEY).buildSync();
     private static final String TAG = MainActivity.class.getSimpleName();
-
     private String photoPath = null;
     private static final int CODE_PICK = 1;
     private static final int CODE_SHOT = 2;
     private static final int REQUEST_SHOT = 3;
     private static final int CODE_SPEAK = 4;
     private ChipGroup chipGroup;
-    private Button btnAddIngredients;
-    private Button btnGenerateRecipe;
     private EditText txtIngredients;
 
     private static final int REQUEST_STORAGE = 0;
@@ -85,15 +81,11 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imgResult;
     private ImageView imgEmptyState;
     private LinearLayout mLinearEmpty;
-    private LinearLayout linearGenerate;
     private LinearLayout linearAddIngredients;
     NetworkConnectivity mNetConn = new NetworkConnectivity(MainActivity.this);
 
     private MenuItem item;
     private Uri imageUri;
-    private Bitmap thumbnail;
-
-    public byte[] jpeg;
 
     String[] PERMISSIONS = {
             Manifest.permission.CAMERA,
@@ -106,19 +98,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        imgResult = (ImageView) findViewById(R.id.img_result);
-        imgResult = (ImageView) findViewById(R.id.img_result);
-        mLblResultTags = (TextView) findViewById(R.id.lbl_result_tag);
-        mLblEmptyState = (TextView) findViewById(R.id.lbl_empty_state);
-        imgEmptyState = (ImageView) findViewById(R.id.img_empty_state);
-        mLblSelectTag = (TextView) findViewById(R.id.lbl_select_tag);
-        btnAddIngredients = (Button) findViewById(R.id.btnAddIngredients);
-        btnGenerateRecipe = (Button) findViewById(R.id.btnGenerateRecipe);
-        txtIngredients = (EditText) findViewById(R.id.txtIngredients);
-        linearAddIngredients = (LinearLayout) findViewById(R.id.linearAddIngredients);
-        linearGenerate = (LinearLayout) findViewById(R.id.linearGenerate);
+        imgResult = findViewById(R.id.img_result);
+        imgResult = findViewById(R.id.img_result);
+        mLblResultTags = findViewById(R.id.lbl_result_tag);
+        mLblEmptyState = findViewById(R.id.lbl_empty_state);
+        imgEmptyState = findViewById(R.id.img_empty_state);
+        mLblSelectTag = findViewById(R.id.lbl_select_tag);
+        this.chipGroup = findViewById(R.id.chipGroup);
+        Button btnAddIngredients = findViewById(R.id.btnAddIngredients);
+        txtIngredients = findViewById(R.id.txtIngredients);
+        linearAddIngredients = findViewById(R.id.linearAddIngredients);
 
-        mLinearEmpty = (LinearLayout) findViewById(R.id.layout_empty_state);
+        mLinearEmpty = findViewById(R.id.layout_empty_state);
         confirmTextDialog = new AlertDialog.Builder(this);
         setSupportActionBar(toolbar);
         grantPermissions();
@@ -127,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String keyword = txtIngredients.getText().toString();
-                if (keyword == null || keyword.isEmpty()) {
+                if (keyword.isEmpty()) {
                     Toast.makeText(getApplicationContext(), "Please enter ingredients!", Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -140,16 +131,16 @@ public class MainActivity extends AppCompatActivity {
                 cameraShot();
             }
         });
+
+
+        Button btnGenerateRecipe = findViewById(R.id.btnGenerateRecipe);
         btnGenerateRecipe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(getApplicationContext(), RecipeActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);
+                generateRecipe();
             }
         });
     }
-
     public void cameraShot() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -168,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                 imageUri = FileProvider.getUriForFile(this,
+                imageUri = FileProvider.getUriForFile(this,
                         "com.ajdeguzman.wyup.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
@@ -196,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (requestCode == CODE_SHOT && resultCode == RESULT_OK) {
                 try {
                     mLinearEmpty.setVisibility(View.GONE);
-                    thumbnail = MediaStore.Images.Media.getBitmap(
+                    Bitmap thumbnail = MediaStore.Images.Media.getBitmap(
                             getContentResolver(), imageUri);
                     imgResult.setImageBitmap(thumbnail);
                     callClarifai();
@@ -229,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
                         .setNeutralButton(R.string.action_retry, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                               // speechText();
+                                // speechText();
                             }
                         })
                         .show();
@@ -250,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (selectedImage != null) {
-                    sendSelectedImage(selectedImage);
+                sendSelectedImage(selectedImage);
             }
         }
     }
@@ -270,6 +261,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(i);*/
         }
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.options_menu, menu);
@@ -280,8 +272,8 @@ public class MainActivity extends AppCompatActivity {
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         return true;
     }
-    private void addNewChip(String keyword) {
 
+    private void addNewChip(String keyword) {
         try {
             LayoutInflater inflater = LayoutInflater.from(this);
             Chip newChip = (Chip) inflater.inflate(R.layout.layout_chip_entry, this.chipGroup, false);
@@ -293,7 +285,6 @@ public class MainActivity extends AppCompatActivity {
                     handleChipCheckChanged((Chip) buttonView, isChecked);
                 }
             });
-
             newChip.setOnCloseIconClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -301,7 +292,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             linearAddIngredients.setVisibility(View.VISIBLE);
-            linearGenerate.setVisibility(View.VISIBLE);
             this.txtIngredients.setText("");
         } catch (Exception e) {
             e.printStackTrace();
@@ -318,6 +308,7 @@ public class MainActivity extends AppCompatActivity {
     // Chip Checked Changed
     private void handleChipCheckChanged(Chip chip, boolean isChecked) {
     }
+
     void requestPermission() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_SHOT);
     }
@@ -355,13 +346,16 @@ public class MainActivity extends AppCompatActivity {
             new ClarifaiTask().execute(new File(photoPath));
         }
     }
+
+    @SuppressLint("StaticFieldLeak")
     private class ClarifaiTask extends AsyncTask<File, Integer, List<String>> {
 
 
         protected List<String> doInBackground(File... images) {
             predictionList.clear();
             List<ClarifaiOutput<Concept>> predictionResults;
-            for (File image : images) {
+
+         for (File image : images) {
                 predictionResults = client.getDefaultModels().foodModel().predict()
                         .withInputs(ClarifaiInput.forImage(image))
                         .withMaxConcepts(10)
@@ -370,26 +364,25 @@ public class MainActivity extends AppCompatActivity {
                         .get();
 
                 for (ClarifaiOutput<Concept> result : predictionResults) {
-                    Log.i("TEST",result.data().size() + "");
+                    Log.i("TEST", result.data().size() + "");
                     for (Concept datum : result.data()) {
                         predictionList.add(datum.name());
                     }
                 }
             }
-
             return predictionList;
         }
 
         protected void onPostExecute(List<String> predictionList) {
-            // Delete photo
             (new File(photoPath)).delete();
             photoPath = null;
 
             if (predictionList != null) {
                 updateUIForResult(predictionList);
-            } //else info.setText("Try again...");
+            }
         }
     }
+
     private Bitmap loadBitmapFromUri(Uri uri) {
         try {
             BitmapFactory.Options opts = new BitmapFactory.Options();
@@ -408,34 +401,50 @@ public class MainActivity extends AppCompatActivity {
         }
         return null;
     }
+
     private void updateUIForResult(List<String> result) {
         tagsListInitial.clear();
 
         if (result != null) {
-                StringBuilder b = new StringBuilder();
-                for(int i=0; i < result.size(); i++)
-                    tagsListInitial.add(result.get(i));
-                mLblResultTags.setVisibility(View.GONE);
-                mLblSelectTag.setVisibility(View.VISIBLE);
-                addChipsViewFinal(tagsListInitial);
-            } else {
-                mLblResultTags.setText(R.string.err_msg_unrecognized_image);
-            }
+            StringBuilder b = new StringBuilder();
+            tagsListInitial.addAll(result);
+            mLblResultTags.setVisibility(View.GONE);
+            mLblSelectTag.setVisibility(View.VISIBLE);
+            addChipsViewFinal(tagsListInitial);
+        } else {
+            mLblResultTags.setText(R.string.err_msg_unrecognized_image);
+        }
 
     }
 
     private void addChipsViewFinal(List<String> tagList) {
-        AdjustableLayout adjustableLayout = (AdjustableLayout) findViewById(R.id.container);
-        adjustableLayout.removeAllViews();
         for (int i = 0; i < tagList.size(); i++) {
-            @SuppressLint("InflateParams") final View newView = LayoutInflater.from(this).inflate(R.layout.layout_view_chip_text, null);
-            chipGroup = (ChipGroup) newView.findViewById(R.id.chipGroup);
             addNewChip(tagList.get(i));
-            adjustableLayout.addingMultipleView(newView);
         }
-        adjustableLayout.invalidateView();
     }
+    private void generateRecipe()  {
+        int count = this.chipGroup.getChildCount();
 
+        String s = null;
+        for(int i=0;i< count; i++) {
+            Chip child = (Chip) this.chipGroup.getChildAt(i);
+
+            if(!child.isChecked()) {
+                continue;
+            }
+
+            if(s == null)  {
+                s = child.getText().toString();
+            } else {
+                s += ", " + child.getText().toString();
+            }
+        }
+        Intent i = new Intent(getApplicationContext(), RecipeActivity.class);
+        i.putExtra("str_ingredients", s.toString());
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(i);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
+    }
     private void sendSelectedImage(Uri selectedImageUri) {
         Log.d("uri", selectedImageUri + "");
         imgResult.setImageDrawable(null);
